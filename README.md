@@ -1,5 +1,15 @@
 # slack-bot-app
 
+## Prerequisites
+* Create a Slack App from the `slack_app_manifest.yaml`
+* On Slack App Settings, Generate a App Level Token ("Basic Information >> App-Level Tokens >> Generate Token") witht he following scopes
+```
+authorizations:read, 
+app_configurations:write,
+connections:write
+``` 
+* On Salesforce, create a connected app that supports Client Credentials Flow, the generate Client Id and Secret
+* On Salesforce, create a Einstei Bot API Connector, getting ForceConfig, Bot URL and Bot Id
 
 ## How to Install
 * Inside the root folder, execute the following command
