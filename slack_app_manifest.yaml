@@ -1,0 +1,30 @@
+display_information:
+  name: sf-einstein-bot
+features:
+  bot_user:
+    display_name: sf-einstein-bot
+    always_online: false
+oauth_config:
+  scopes:
+    bot:
+      - app_mentions:read
+      - chat:write
+      - im:write
+      - im:read
+      - channels:history
+      - groups:history
+      - im:history
+      - reactions:read
+settings:
+  event_subscriptions:
+    bot_events:
+      - app_mention
+      - message.channels
+      - message.groups
+      - message.im
+      - reaction_added
+  interactivity:
+    is_enabled: true
+  org_deploy_enabled: false
+  socket_mode_enabled: true
+  token_rotation_enabled: false
