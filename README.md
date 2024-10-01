@@ -11,7 +11,7 @@ npm install
 * Fill `.env` with the valid credentials from Slack App and Salesforce
 * Start the application by running the command below
 ```
-npm start index.js
+npm start
 ```
 
 ## OpenSource Dependencies
