@@ -14,13 +14,13 @@ const app = new App({
 });
 
 var sessions = {};
-/* Handle All Messages from Slack Channels*/
+/* Handle All Messages from Slack Channels */
 app.message(/./, async ({ command, say, message }) => {
     try {
       if (message.text.indexOf('endchat')!= -1)
         return;
-      console.log('Message Received: ', message);
-      let slackSession = message.user+''+message.channel+''+message.channel_type;
+      console.log('Message Received: ', JSON.stringify(message));
+      let slackSession = message.user+''+message.channel+''+message.channel_type+''+(message.thread_ts || message.ts);
       console.log('Slack Session: ', slackSession);
       console.log('Existing Sessions: ', JSON.stringify(sessions));
       if (!sessions[slackSession]){
@@ -37,7 +37,7 @@ app.message(/./, async ({ command, say, message }) => {
       }
       console.log('Sessions: ', JSON.stringify(sessions));
       for(let reply of sessionStart.messages){
-        await say(convertEinsteinResponseToSlackFormat(reply, sessions[slackSession].sessionId));
+        await say( {...convertEinsteinResponseToSlackFormat(reply, sessions[slackSession].sessionId), thread_ts:message.ts});
         sessions[sessionStart.sessionId] = {   
           inReplytoMessageId: reply.id
         };
@@ -53,8 +53,8 @@ app.message(/./, async ({ command, say, message }) => {
 app.message('endchat', async ({ command, say, message }) => {
   try {
     
-    console.log('End Chat Message Received: ', message);
-    let slackSession = message.user+''+message.channel+''+message.channel_type;
+    console.log('End Chat Message Received: ', JSON.stringify(message));
+    let slackSession = message.user+''+message.channel+''+message.channel_type+''+ (message.thread_ts ?? message.ts);
     console.log('Slack Session: ', slackSession);
     console.log('Existing Sessions: ', JSON.stringify(sessions));
     if (!sessions[slackSession]){
@@ -62,9 +62,11 @@ app.message('endchat', async ({ command, say, message }) => {
     }
     if (sessions[slackSession].sessionId) {
       await endBotSession(sessions[slackSession].sessionId);
-      await say('Einstein ChatBot Sessions Ended: '+ sessions[slackSession].sessionId);
-      sessions[sessions[slackSession].sessionId] = {};
-      sessions[slackSession] = {};
+      await say({text: 'Einstein ChatBot Sessions Ended: '+ sessions[slackSession].sessionId, thread_ts:message.ts});
+      delete sessions[sessions[slackSession].sessionId];
+      delete sessions[slackSession];
+    }else {
+      await say({text: 'Einstein Session not found.', thread_ts: message.ts});
     }
   } catch (error) {
     console.error(error);
@@ -73,18 +75,18 @@ app.message('endchat', async ({ command, say, message }) => {
 });
 
 /* Handle Button Actions from Slack Channels */
-app.action(/./, async ({ action, ack, say }) => {
+app.action(/./, async ({ action, ack, say, body }) => {
   await ack();
   if(action.action_id.indexOf('einstein_bot')!= -1) {
     let einsteiBotSessionId = action.action_id.split('|')[0];
     let einsteiBotInReplyToMessageId = action.value.split('|')[0];
     let einsteinBotChoiceId =  action.action_id.split('|')[1];
-    console.log('Action: ', JSON.stringify(action));
+    console.log('Action Body: ', JSON.stringify(body));
     // Update the message to reflect the action
     let sessionStart = await continueBotSessionChoice(einsteiBotSessionId, new Date().getMilliseconds(), einsteinBotChoiceId, einsteiBotInReplyToMessageId );
     console.log('Session Start: ', JSON.stringify(sessionStart));
     for(let reply of sessionStart.messages){
-      await say(convertEinsteinResponseToSlackFormat(reply, einsteiBotSessionId));
+      await say({...convertEinsteinResponseToSlackFormat(reply, einsteiBotSessionId), thread_ts: body.message.ts});
       sessions[einsteiBotSessionId].inReplytoMessageId = reply.id;
     }
   }

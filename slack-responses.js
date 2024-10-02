@@ -1,7 +1,7 @@
 //SF TO Slack
 
 const convertEinsteinResponseToSlackFormat = (message, sessionId) => {
-    console.log(JSON.stringify(message));
+    console.log('Einstein Bot Messages: ', JSON.stringify(message));
     if (message.type == 'text')
         return textResponse(message);
     else if (message.type == 'choices')
@@ -10,7 +10,7 @@ const convertEinsteinResponseToSlackFormat = (message, sessionId) => {
 
 
 const textResponse = (message) => {
-    return message.text;
+    return {text: message.text};
 }
 
 const choiceResponse = (message, sessionId) => {
